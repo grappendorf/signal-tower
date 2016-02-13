@@ -1,5 +1,5 @@
 /**
- * This file is part of the signallight firmware.
+ * This file is part of the signal-tower firmware.
  *
  * (c) 2016 Dirk Grappendorf (www.grappendorf.net)
  */
