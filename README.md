@@ -17,8 +17,12 @@ today more and more development teams are installing some kind of easily percept
 good/broken-indicators. This can either be a big monitor which displays some kind of a build
 status dashboard, or a stylish industrial signal tower like the one in the picture above.
 
-This a custom shield for an Arduino which can control three signal tower lights. It is accessable 
-via WLAN and the firmware implements a small HTTP server, which allows you to control the signal 
+This a custom shield for an Arduino which can control three signal tower lights. It is accessable
+via WLAN and the firmware implements a small HTTP server, which allows you to control the signal
 tower through some simple HTTP-REST-APIs.
 
 [Read more about this project on my website...](http://www.grappendorf.net/projects/signal-tower.html)
+
+# Build
+
+This project is powered by [PlatformIO](http://platformio.org/#!/)
