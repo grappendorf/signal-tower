@@ -6,7 +6,7 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include "EEPROMex.h"
+#include <EEPROMex.h>
 #include <avr/wdt.h>
 
 const uint8_t PIN_GREEN = 13;
