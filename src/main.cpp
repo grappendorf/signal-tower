@@ -19,6 +19,9 @@ bool red;
 bool yellow;
 bool mute;
 int ambient;
+unsigned long green_timeout = 0;
+unsigned long red_timeout = 0;
+unsigned long yellow_timeout = 0;
 
 uint16_t magic;
 uint8_t threshold;
@@ -38,11 +41,12 @@ int contentLength;
 Method method;
 String path;
 
-const int BUFFER_LENGTH = 100;
+const int BUFFER_LENGTH = 200;
 char buffer[BUFFER_LENGTH + 1];
 
 void readEeprom();
 void updateLeds();
+void checkLedTimeouts();
 void processSensors();
 void getSensors();
 void getLeds();
@@ -85,6 +89,7 @@ void loop() {
   }
 
   processSensors();
+  checkLedTimeouts();
 }
 
 void readEeprom() {
@@ -105,6 +110,24 @@ void updateLeds() {
   digitalWrite(PIN_GREEN, (green && !mute) ? HIGH : LOW);
   digitalWrite(PIN_RED, (red && !mute) ? HIGH : LOW);
   digitalWrite(PIN_YELLOW, (yellow && !mute) ? HIGH : LOW);
+}
+
+void checkLedTimeouts() {
+  if (green_timeout != 0 && millis() > green_timeout) {
+    green = false;
+    green_timeout = 0;
+    updateLeds();
+  }
+  if (red_timeout != 0 && millis() > red_timeout) {
+    red = false;
+    red_timeout = 0;
+    updateLeds();
+  }
+  if (yellow_timeout != 0 && millis() > yellow_timeout) {
+    yellow = false;
+    yellow_timeout = 0;
+    updateLeds();
+  }
 }
 
 void processSensors() {
@@ -132,6 +155,15 @@ void getLeds() {
   json["yellow"] = yellow;
   json["red"] = red;
   json["muted"] = mute;
+  if (green_timeout > 0) {
+    json["green_duration"] = (green_timeout - millis()) / 1000;
+  }
+  if (red_timeout > 0) {
+    json["red_duration"] = (red_timeout - millis()) / 1000;
+  }
+  if (yellow_timeout > 0) {
+    json["yellow_duration"] = (yellow_timeout - millis()) / 1000;
+  }
   sendResponse(200, json);
 }
 
@@ -143,11 +175,23 @@ void putLeds() {
     if (json.containsKey("green")) {
       green = json["green"];
     }
+    if (json.containsKey("green_duration") && json["green_duration"] > 0) {
+      green_timeout = millis() + (int) json["green_duration"] * 1000;
+      green_timeout = max(green_timeout, 1);
+    }
     if (json.containsKey("red")) {
       red = json["red"];
     }
+    if (json.containsKey("red_duration") && json["red_duration"] > 0) {
+      red_timeout = millis() + (int) json["red_duration"] * 1000;
+      red_timeout = max(red_timeout, 1);
+    }
     if (json.containsKey("yellow")) {
       yellow = json["yellow"];
+    }
+    if (json.containsKey("yellow_duration") && json["yellow_duration"] > 0) {
+      yellow_timeout = millis() + (int) json["yellow_duration"] * 1000;
+      yellow_timeout = max(yellow_timeout, 1);
     }
     updateLeds();
     sendResponse(204);
